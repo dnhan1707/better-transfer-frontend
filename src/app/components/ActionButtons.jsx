@@ -1,9 +1,10 @@
 export default function ActionButtons({
     handleSearch,
-    clearAll
+    clearAll,
+    isCompact = false
 }){
     return (
-        <div className="action-controls">
+        <div className={`action-controls ${isCompact ? 'compact' : ''}`}>
             <button className="primary-btn action-btn" onClick={handleSearch}>
                 Generate Plan
             </button>
@@ -12,28 +13,33 @@ export default function ActionButtons({
             </button>
 
             <style jsx>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
                 .action-controls {
                     display: flex;
-                    gap: 1rem;
-                    justify-content: flex-start;
-                    margin-top: 2.5rem;
-                    padding-top: 1.5rem;
+                    gap: 0.75rem;
+                    margin-top: auto;
+                    padding-top: 1rem;
                     border-top: 1px solid #e5e5e5;
+                    flex-shrink: 0;
+                }
+
+                .action-controls.compact {
+                    flex-direction: column;
+                    margin-top: 1.5rem;
                 }
 
                 .action-btn {
-                    padding: 0.75rem 1.5rem;
-                    border-radius: 6px;
+                    padding: 0.75rem 1rem;
+                    border-radius: 5px;
                     font-family: 'Inter', sans-serif;
                     font-weight: 500;
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     border: 1px solid;
-                    min-width: 120px;
                     text-align: center;
+                    flex: 1;
                 }
 
                 .primary-btn {
@@ -47,11 +53,6 @@ export default function ActionButtons({
                     border-color: #333333;
                     transform: translateY(-1px);
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-                }
-
-                .primary-btn:active {
-                    transform: translateY(0);
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
                 }
 
                 .secondary-btn {
@@ -68,35 +69,10 @@ export default function ActionButtons({
                     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
                 }
 
-                .secondary-btn:active {
-                    transform: translateY(0);
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-                }
-
                 @media (max-width: 768px) {
                     .action-controls {
                         flex-direction: column;
-                        gap: 0.75rem;
-                        margin-top: 2rem;
-                        padding-top: 1.25rem;
-                    }
-                    
-                    .action-btn {
-                        width: 100%;
-                        min-width: auto;
-                        padding: 0.875rem 1.5rem;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .action-controls {
-                        margin-top: 1.5rem;
-                        padding-top: 1rem;
-                    }
-
-                    .action-btn {
-                        padding: 0.8rem 1.25rem;
-                        font-size: 0.85rem;
+                        gap: 0.5rem;
                     }
                 }
             `}</style>

@@ -14,10 +14,11 @@ export default function InputFormContainer({
     universities,
     majors,
     handleSearch,
-    clearAll
+    clearAll,
+    isCompact = false
 }){
     return (
-        <div className="planning-container">
+        <div className={`planning-container ${isCompact ? 'compact' : ''}`}>
             <div className="container-header">
                 <h2 className="section-title">Configuration</h2>
                 <p className="section-description">Set up your transfer preferences</p>
@@ -28,6 +29,7 @@ export default function InputFormContainer({
                 <CommunityCollegeSelection
                     chosenCollege={chosenCollege}
                     setChosenCollege={setChosenCollege}
+                    isCompact={isCompact}
                 />
                 <PairSelection
                     addNewPair={addNewPair}
@@ -36,36 +38,44 @@ export default function InputFormContainer({
                     removePair={removePair}
                     universities={universities}
                     majors={majors}
+                    isCompact={isCompact}
                 />
                 <ActionButtons
                     handleSearch={handleSearch}
                     clearAll={clearAll}
+                    isCompact={isCompact}
                 />
             </div>
 
             <style jsx>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
                 .planning-container {
                     background: #ffffff;
-                    border: 1px solid #e5e5e5;
-                    border-radius: 8px;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
                     font-family: 'Inter', sans-serif;
-                    margin-bottom: 3rem;
+                    height: 100vh;
                     overflow: hidden;
+                    display: flex;
+                    flex-direction: column;
+                }
+
+                .planning-container.compact {
+                    border: none;
+                    border-radius: 0;
+                    box-shadow: none;
                 }
 
                 .container-header {
                     background: #f8f9fa;
-                    padding: 2rem 2.5rem;
+                    padding: 1.5rem;
                     border-bottom: 1px solid #e5e5e5;
+                    flex-shrink: 0;
                 }
 
                 .section-title {
                     margin: 0 0 0.5rem 0;
                     color: #1a1a1a;
-                    font-size: 1.5rem;
+                    font-size: 1.25rem;
                     font-weight: 500;
                     letter-spacing: -0.01em;
                 }
@@ -73,40 +83,49 @@ export default function InputFormContainer({
                 .section-description {
                     margin: 0;
                     color: #666;
-                    font-size: 0.95rem;
+                    font-size: 0.875rem;
                     font-weight: 400;
                 }
 
                 .form-sections {
-                    padding: 2.5rem;
+                    padding: 1.5rem;
+                    overflow-y: auto;
+                    flex: 1;
+                    display: flex;
+                    flex-direction: column;
+                }
+                    
+
+                /* Custom scrollbar */
+                .form-sections::-webkit-scrollbar {
+                    width: 6px;
+                }
+
+                .form-sections::-webkit-scrollbar-track {
+                    background: #f1f1f1;
+                    border-radius: 3px;
+                }
+
+                .form-sections::-webkit-scrollbar-thumb {
+                    background: #c1c1c1;
+                    border-radius: 3px;
+                }
+
+                .form-sections::-webkit-scrollbar-thumb:hover {
+                    background: #a8a8a8;
                 }
 
                 @media (max-width: 768px) {
-                    .planning-container {
-                        border-radius: 6px;
-                        margin-bottom: 2rem;
-                    }
-                    
                     .container-header {
-                        padding: 1.5rem 1.5rem;
+                        padding: 1.25rem;
                     }
 
                     .section-title {
-                        font-size: 1.3rem;
+                        font-size: 1.125rem;
                     }
 
                     .section-description {
-                        font-size: 0.9rem;
-                    }
-
-                    .form-sections {
-                        padding: 1.5rem;
-                    }
-                }
-
-                @media (max-width: 480px) {
-                    .container-header {
-                        padding: 1.25rem;
+                        font-size: 0.8rem;
                     }
 
                     .form-sections {

@@ -1,214 +1,233 @@
 export default function PlannerHeader({ data, completedCount, totalCourses, onBack, onReorderPlan }) {
   const progressPercentage = totalCourses > 0 ? Math.round((completedCount / totalCourses) * 100) : 0;
+  const hasCompletedCourses = completedCount > 0;
 
   return (
     <div className="planner-header">
-      <div className="header-actions">
-        <button onClick={onBack} className="back-btn">
-          ← Back to Search
-        </button>
-        <button onClick={onReorderPlan} className="reorder-btn">
-          Re-order Plan
-        </button>
-      </div>
-      
-      <div className="header-content">
-        <div className="title-section">
-          <h2>Transfer Plan</h2>
-          <div className="progress-section">
-            <div className="progress-bar">
-              <div 
-                className="progress-fill"
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
-            <span className="progress-text">
-              {completedCount} of {totalCourses} courses completed ({progressPercentage}%)
-            </span>
+      <div className="header-main">
+        <div className="plan-info">
+          <div className="plan-title">
+            <h3>{data.university}</h3>
+            <span className="major">{data.major}</span>
           </div>
         </div>
         
-        <div className="plan-info">
-          <div className="info-item">
-            <span className="label">From:</span>
-            <span className="value">{data.source_college}</span>
-          </div>
-          <div className="targets">
-            <span className="label">To:</span>
-            <div className="target-list">
-              {data.targets.map((target, index) => (
-                <div key={index} className="target-item">
-                  <span className="university">{target.university}</span>
-                  <span className="major">{target.major}</span>
-                </div>
-              ))}
+        <div className="header-right">
+          <div className="progress-compact">
+            <span className="progress-text">{completedCount}/{totalCourses}</span>
+            <div className="progress-bar-mini">
+              <div 
+                className="progress-fill-mini" 
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
             </div>
+            <span className="progress-percent">{progressPercentage}%</span>
           </div>
+          
+          <button 
+            className={`reorder-button ${!hasCompletedCourses ? 'disabled' : ''}`}
+            onClick={hasCompletedCourses ? onReorderPlan : undefined}
+            disabled={!hasCompletedCourses}
+            title={hasCompletedCourses ? "Optimize plan based on completed courses" : "Mark some courses as completed to optimize"}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/>
+              <rect x="8" y="2" width="8" height="4" rx="1" ry="1"/>
+            </svg>
+            Optimize
+          </button>
         </div>
       </div>
 
       <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
         .planner-header {
-          padding: 2rem;
-          background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-          color: white;
+          background: #f8f9fa;
+          border-bottom: 1px solid #e5e5e5;
+          font-family: 'Inter', sans-serif;
+          height: 50px;
+          display: flex;
+          align-items: center;
         }
 
-        .header-actions {
+        .header-main {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1.5rem;
+          padding: 0 1.5rem;
+          width: 100%;
           gap: 1rem;
         }
 
-        .back-btn {
-          background: rgba(255, 255, 255, 0.2);
-          color: white;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-          padding: 8px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          transition: all 0.2s;
-        }
-
-        .back-btn:hover {
-          background: rgba(255, 255, 255, 0.3);
-          border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .reorder-btn {
-          background: #007bff;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 6px;
-          cursor: pointer;
-          font-size: 0.9rem;
-          font-weight: 500;
-          transition: all 0.2s;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .reorder-btn:hover {
-          background: #0056b3;
-          transform: translateY(-1px);
-          box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
-        }
-
-        .title-section {
-          margin-bottom: 1.5rem;
-        }
-
-        .header-content h2 {
-          margin: 0 0 1rem 0;
-          font-size: 1.8rem;
-          font-weight: 600;
-        }
-
-        .progress-section {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .progress-bar {
-          width: 100%;
-          height: 8px;
-          background: rgba(255, 255, 255, 0.2);
-          border-radius: 4px;
-          overflow: hidden;
-        }
-
-        .progress-fill {
-          height: 100%;
-          background: #28a745;
-          border-radius: 4px;
-          transition: width 0.3s ease;
-        }
-
-        .progress-text {
-          font-size: 0.9rem;
-          opacity: 0.9;
-        }
-
         .plan-info {
-          display: flex;
-          gap: 2rem;
-          align-items: flex-start;
-          flex-wrap: wrap;
+          flex: 1;
+          min-width: 0;
+          text-align: left;
         }
 
-        .info-item {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .targets {
-          display: flex;
-          align-items: flex-start;
-          gap: 0.5rem;
-        }
-
-        .label {
-          font-weight: 500;
-          opacity: 0.9;
-        }
-
-        .value {
-          font-weight: 600;
-        }
-
-        .target-list {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-        }
-
-        .target-item {
-          display: flex;
-          flex-direction: column;
-          background: rgba(255, 255, 255, 0.1);
-          padding: 8px 12px;
-          border-radius: 6px;
-        }
-
-        .university {
-          font-weight: 600;
+        .plan-title h3 {
+          margin: 0;
           font-size: 0.9rem;
+          font-weight: 600;
+          color: #1a1a1a;
+          line-height: 1.2;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
 
         .major {
-          font-size: 0.8rem;
-          opacity: 0.9;
+          font-size: 0.75rem;
+          color: #666;
+          font-weight: 400;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: block;
+          margin-top: 0.1rem;
+        }
+
+        .header-right {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+
+        .progress-compact {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          font-size: 0.7rem;
+        }
+
+        .progress-text {
+          color: #666;
+          font-weight: 500;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        .progress-bar-mini {
+          width: 50px;
+          height: 3px;
+          background: #e5e7eb;
+          border-radius: 1.5px;
+          overflow: hidden;
+        }
+
+        .progress-fill-mini {
+          height: 100%;
+          background: #10b981;
+          transition: width 0.3s ease;
+          border-radius: 1.5px;
+        }
+
+        .progress-percent {
+          color: #666;
+          font-weight: 500;
+          min-width: 28px;
+          text-align: right;
+        }
+
+        .reorder-button {
+          display: flex;
+          align-items: center;
+          gap: 0.3rem;
+          padding: 0.4rem 0.7rem;
+          background: #ffffff;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          color: #374151;
+          font-family: 'Inter', sans-serif;
+          font-size: 0.75rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          height: 32px;
+        }
+
+        .reorder-button:hover:not(.disabled) {
+          background: #f3f4f6;
+          border-color: #9ca3af;
+          transform: translateY(-1px);
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .reorder-button.disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: #f9fafb;
+          color: #9ca3af;
+          border-color: #e5e7eb;
         }
 
         @media (max-width: 768px) {
           .planner-header {
-            padding: 1.5rem;
+            height: auto;
+            min-height: 50px;
           }
 
-          .header-actions {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 0.5rem;
+          .header-main {
+            padding: 0.5rem 1rem;
+            flex-wrap: wrap;
+            gap: 0.75rem;
           }
 
           .plan-info {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 0.5rem;
+          }
+
+          .plan-title h3 {
+            font-size: 0.85rem;
+          }
+
+          .major {
+            font-size: 0.7rem;
+          }
+
+          .header-right {
+            width: 100%;
+            justify-content: space-between;
+            gap: 0.75rem;
+          }
+
+          .progress-bar-mini {
+            width: 40px;
+          }
+
+          .reorder-button {
+            padding: 0.3rem 0.5rem;
+            font-size: 0.7rem;
+            height: 28px;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .header-main {
+            padding: 0.4rem 0.75rem;
+          }
+
+          .header-right {
             flex-direction: column;
-            gap: 1rem;
+            gap: 0.5rem;
+            align-items: center;
           }
 
-          .header-content h2 {
-            font-size: 1.5rem;
+          .progress-compact {
+            order: 1;
           }
 
-          .reorder-btn {
+          .reorder-button {
+            order: 2;
+            width: 100%;
             justify-content: center;
+            max-width: 120px;
+          }
+
+          .progress-bar-mini {
+            width: 60px;
           }
         }
       `}</style>
