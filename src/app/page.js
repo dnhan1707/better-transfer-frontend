@@ -1,12 +1,17 @@
 "use client"
 
-import { useState } from "react";
-import DropDown from "./components/Dropdown";
-import UniMajorPair from "./components/UniMajorPair";
+import { useState, useCallback } from "react";
+import InputFormContainer from "./components/InputFormContainer";
+import CoursePlanner from "./components/CoursePlanner";
+import sampleData from "./data/multi_university_sample.json";
 
 export default function Home() {
   const [chosenCollege, setChosenCollege] = useState("")
-  const [uniMajorPairs, setUniMajorPairs] = useState([{}]) // Start with one empty pair
+  const [uniMajorPairs, setUniMajorPairs] = useState([{}])
+  const [errorMessage, setErrorMessage] = useState("")
+  const [showResults, setShowResults] = useState(false)
+  const [courseData, setCourseData] = useState(null)
+  const [completedCourses, setCompletedCourses] = useState([]) // Array of course codes
   
   // State for custom options
   const [universities, setUniversities] = useState([
@@ -22,31 +27,70 @@ export default function Home() {
   
   const addNewPair = () => {
     setUniMajorPairs([...uniMajorPairs, {}])
+    setErrorMessage("")
   }
 
-  const updatePair = (index, pairData) => {
-    const newPairs = [...uniMajorPairs]
-    newPairs[index] = pairData
-    setUniMajorPairs(newPairs)
-  }
+  const updatePair = useCallback((index, pairData) => {
+    setUniMajorPairs(prevPairs => {
+      const newPairs = [...prevPairs]
+      newPairs[index] = pairData
+      return newPairs
+    })
+    setErrorMessage("")
+  }, [])
 
   const removePair = (index) => {
     if (uniMajorPairs.length > 1) {
       const newPairs = uniMajorPairs.filter((_, i) => i !== index)
       setUniMajorPairs(newPairs)
+      setErrorMessage("")
     }
   }
 
   const clearAll = () => {
     setChosenCollege("")
     setUniMajorPairs([{}])
+    setErrorMessage("")
+    setShowResults(false)
+    setCourseData(null)
+    setCompletedCourses([]) // Clear completed courses
+  }
+
+  // Toggle course completion status
+  const toggleCourseCompletion = (courseCode) => {
+    setCompletedCourses(prev => {
+      if (prev.includes(courseCode)) {
+        // Remove from completed
+        return prev.filter(code => code !== courseCode)
+      } else {
+        // Add to completed
+        return [...prev, courseCode]
+      }
+    })
   }
 
   const handleSearch = () => {
+    setErrorMessage("")
+    
+    if (!chosenCollege) {
+      setErrorMessage("Please select a community college.")
+      return
+    }
+    
     const validPairs = uniMajorPairs.filter(pair => pair.university && pair.major)
+    
+    if (validPairs.length === 0) {
+      setErrorMessage("Please complete at least one university-major pair.")
+      return
+    }
+    
+    // Simulate API call - replace with actual API call later
+    setCourseData(sampleData)
+    setShowResults(true)
+    
     console.log("College:", chosenCollege)
     console.log("University-Major Pairs:", validPairs)
-    // Add your search logic here
+    console.log("Completed Courses:", completedCourses)
   }
 
   return (
@@ -56,54 +100,28 @@ export default function Home() {
         <p>Find your perfect transfer path</p>
       </div>
       
-      <div className="form-container">
-        {/* Community College Selection */}
-        <div className="college-section">
-          <label>Community College</label>
-          <DropDown
-            options={[
-              "Pasadena City College",
-              "Santa Monica College",
-              "Los Angeles City College"
-            ]}  
-            value={chosenCollege}
-            onChange={setChosenCollege}
-            placeholder="Select community college"
-            className="college-dropdown"
-            searchable={true}
-          />
-        </div>
+      <InputFormContainer
+        errorMessage={errorMessage}
+        chosenCollege={chosenCollege}
+        setChosenCollege={setChosenCollege}
+        addNewPair={addNewPair}
+        uniMajorPairs={uniMajorPairs}
+        updatePair={updatePair}
+        removePair={removePair}
+        universities={universities}
+        majors={majors}
+        handleSearch={handleSearch}
+        clearAll={clearAll}
+      />
 
-        {/* University-Major Pairs */}
-        <div className="pairs-section">
-          <div className="section-header">
-            <h3>University & Major Pairs</h3>
-            <button onClick={addNewPair} className="add-pair-btn">
-              + Add Another Pair
-            </button>
-          </div>
-
-          <div className="pairs-container">
-            {uniMajorPairs.map((pair, index) => (
-              <UniMajorPair
-                key={index}
-                pairData={pair}
-                onPairChange={(pairData) => updatePair(index, pairData)}
-                onRemove={() => removePair(index)}
-                universities={universities}
-                majors={majors}
-                showRemoveButton={uniMajorPairs.length > 1}
-              />
-            ))}
-          </div>
-        </div>
-
-
-        <div className="action-buttons">
-          <button className="search-btn" onClick={handleSearch}>Find Transfer Paths</button>
-          <button className="clear-btn" onClick={clearAll}>Clear All</button>
-        </div>
-      </div>
+      {showResults && courseData && (
+        <CoursePlanner 
+          data={courseData}
+          completedCourses={completedCourses}
+          onToggleCourse={toggleCourseCompletion}
+          onBack={() => setShowResults(false)}
+        />
+      )}
 
       <style jsx>{`
         .page-container {
@@ -132,162 +150,6 @@ export default function Home() {
           font-weight: 400;
         }
 
-        .form-container {
-          max-width: 1200px;
-          margin: 0 auto;
-          background: white;
-          border-radius: 12px;
-          padding: 2.5rem;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          border: 1px solid #e9ecef;
-        }
-
-        .college-section {
-          margin-bottom: 2.5rem;
-        }
-
-        .college-section label {
-          display: block;
-          font-weight: 500;
-          margin-bottom: 0.75rem;
-          color: #2c3e50;
-          font-size: 1.1rem;
-        }
-
-        .pairs-section {
-          margin-bottom: 2.5rem;
-        }
-
-        .section-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 1.5rem;
-        }
-
-        .section-header h3 {
-          margin: 0;
-          color: #2c3e50;
-          font-size: 1.2rem;
-        }
-
-        .add-pair-btn {
-          background: #28a745;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 6px;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: background 0.2s;
-        }
-
-        .add-pair-btn:hover {
-          background: #218838;
-        }
-
-        .pairs-container {
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .add-options-section {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 2rem;
-          margin-bottom: 2.5rem;
-          padding: 1.5rem;
-          background: #f8f9fa;
-          border-radius: 8px;
-        }
-
-        .add-option-group h4 {
-          margin: 0 0 1rem 0;
-          color: #2c3e50;
-          font-size: 1rem;
-        }
-
-        .add-option {
-          display: flex;
-          gap: 0.5rem;
-        }
-
-        .add-input {
-          flex: 1;
-          padding: 8px 12px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
-          font-size: 0.9rem;
-          outline: none;
-          transition: border-color 0.2s;
-        }
-
-        .add-input:focus {
-          border-color: #2c3e50;
-        }
-
-        .add-btn {
-          background: #2c3e50;
-          color: white;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 6px;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: background 0.2s;
-          white-space: nowrap;
-        }
-
-        .add-btn:hover {
-          background: #34495e;
-        }
-
-        .action-buttons {
-          display: flex;
-          gap: 1rem;
-          justify-content: center;
-          flex-wrap: wrap;
-        }
-
-        .search-btn {
-          background: #2c3e50;
-          color: white;
-          border: none;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-size: 0.95rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          font-family: inherit;
-        }
-
-        .search-btn:hover {
-          background: #34495e;
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(44, 62, 80, 0.2);
-        }
-
-        .clear-btn {
-          background: white;
-          color: #6c757d;
-          border: 1px solid #dee2e6;
-          padding: 12px 24px;
-          border-radius: 8px;
-          font-size: 0.95rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          font-family: inherit;
-        }
-
-        .clear-btn:hover {
-          border-color: #adb5bd;
-          color: #495057;
-          background: #f8f9fa;
-        }
-
         @media (max-width: 768px) {
           .page-container {
             padding: 1rem;
@@ -295,26 +157,6 @@ export default function Home() {
           
           .header h1 {
             font-size: 2rem;
-          }
-          
-          .form-container {
-            padding: 1.5rem;
-          }
-
-          .section-header {
-            flex-direction: column;
-            gap: 1rem;
-            align-items: stretch;
-          }
-          
-          .action-buttons {
-            flex-direction: column;
-            align-items: center;
-          }
-          
-          .search-btn, .clear-btn {
-            width: 100%;
-            max-width: 300px;
           }
         }
       `}</style>
