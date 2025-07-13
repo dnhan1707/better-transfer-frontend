@@ -1,4 +1,3 @@
-import { useState } from 'react';
 
 export default function PairSelection({
     addNewPair,
@@ -8,69 +7,78 @@ export default function PairSelection({
     universities,
     majors,
     isCompact = false
-}) {
+}){
+    const handleUniversityChange = (index, universityName) => {
+        const university = universities.find(uni => uni.university_name === universityName);
+        updatePair(index, { 
+            ...uniMajorPairs[index], 
+            university: universityName,
+            university_id: university ? university.id : null
+        });
+    };
+
+    const handleMajorChange = (index, majorName) => {
+        const major = majors.find(maj => maj.major_name === majorName);
+        updatePair(index, { 
+            ...uniMajorPairs[index], 
+            major: majorName,
+            major_id: major ? major.id : null
+        });
+    };
+
     return (
-        <div className="pair-selection-section">
-            <div className="section-header">
-                <h3 className="section-title">Target Universities & Majors</h3>
-                <button className="add-pair-btn" onClick={addNewPair}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <path d="M12 5v14M5 12h14"/>
-                    </svg>
-                    Add Option
-                </button>
-            </div>
+        <div className="pair-selection">
+            <label>Target Universities & Majors</label>
             
-            <div className="pairs-container">
-                {uniMajorPairs.map((pair, index) => (
-                    <div key={index} className="pair-item">
-                        <div className="pair-header">
-                            <span className="pair-number">Option {index + 1}</span>
-                            {uniMajorPairs.length > 1 && (
-                                <button 
-                                    className="remove-pair-btn"
-                                    onClick={() => removePair(index)}
-                                    title="Remove this option"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                        <path d="M18 6L6 18M6 6l12 12"/>
-                                    </svg>
-                                </button>
-                            )}
-                        </div>
-                        
-                        <div className="pair-inputs">
-                            <div className="input-group">
-                                <label className="input-label">University</label>
-                                <select
-                                    value={pair.university || ''}
-                                    onChange={(e) => updatePair(index, { ...pair, university: e.target.value })}
-                                    className="pair-select"
-                                >
-                                    <option value="">Select University</option>
-                                    {universities.map((uni, uniIndex) => (
-                                        <option key={uniIndex} value={uni}>{uni}</option>
-                                    ))}
-                                </select>
-                            </div>
-                            
-                            <div className="input-group">
-                                <label className="input-label">Major</label>
-                                <select
-                                    value={pair.major || ''}
-                                    onChange={(e) => updatePair(index, { ...pair, major: e.target.value })}
-                                    className="pair-select"
-                                >
-                                    <option value="">Select Major</option>
-                                    {majors.map((major, majorIndex) => (
-                                        <option key={majorIndex} value={major}>{major}</option>
-                                    ))}
-                                </select>
-                            </div>
-                        </div>
+            {uniMajorPairs.map((pair, index) => (
+                <div key={index} className="pair-row">
+                    <div className="pair-inputs">
+                        <select
+                            value={pair.university || ""}
+                            onChange={(e) => handleUniversityChange(index, e.target.value)}
+                            className="pair-select university-select"
+                        >
+                            <option value="">Select University</option>
+                            {universities.map((uni, uniIndex) => (
+                                <option key={uniIndex} value={uni.university_name}>
+                                    {uni.university_name}
+                                </option>
+                            ))}
+                        </select>
+
+                        <select
+                            value={pair.major || ""}
+                            onChange={(e) => handleMajorChange(index, e.target.value)}
+                            className="pair-select major-select"
+                        >
+                            <option value="">Select Major</option>
+                            {majors.map((major, majorIndex) => (
+                                <option key={majorIndex} value={major.major_name}>
+                                    {major.major_name}
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                ))}
-            </div>
+
+                    {uniMajorPairs.length > 1 && (
+                        <button
+                            type="button"
+                            onClick={() => removePair(index)}
+                            className="remove-pair-btn"
+                        >
+                            ×
+                        </button>
+                    )}
+                </div>
+            ))}
+
+            <button
+                type="button"
+                onClick={addNewPair}
+                className="add-pair-btn"
+            >
+                + Add Another Combination
+            </button>
 
             <style jsx>{`
                 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');

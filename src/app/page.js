@@ -3,28 +3,31 @@
 import { useState, useCallback } from "react";
 import InputFormContainer from "./components/InputFormContainer";
 import CoursePlanner from "./components/CoursePlanner";
-import sampleData from "./data/multi_university_sample.json";
+import { universities } from "../../public/university";
+import { majors } from "../../public/major";
+import { college } from "../../public/college";
+import { fetchTransferPlan } from "./service/fetchingFunctions";
+import { loadingMessages } from "../../public/messageLoading";
 
 export default function Home() {
-  const [chosenCollege, setChosenCollege] = useState("")
+  const [chosenCollege, setChosenCollege] = useState(null) 
   const [uniMajorPairs, setUniMajorPairs] = useState([{}])
   const [errorMessage, setErrorMessage] = useState("")
   const [showResults, setShowResults] = useState(false)
   const [courseData, setCourseData] = useState(null)
   const [completedCourses, setCompletedCourses] = useState([])
   const [sidebarOpen, setSidebarOpen] = useState(true)
-  
-  const [universities, setUniversities] = useState([
-    "University of California, Los Angeles",
-    "University of California, Berkeley"
-  ])
-  const [majors, setMajors] = useState([
-    "Computer Science",
-    "Data Science", 
-    "Business Administration",
-    "Engineering"
-  ])
-  
+  const [isLoading, setIsLoading] = useState(false) 
+  const [loadingMessage, setLoadingMessage] = useState("") 
+
+  const handleDataUpdate = (newData) => {
+    setCourseData(newData);
+  };
+
+  const handleClearCompleted = () => {
+    setCompletedCourses([]);
+  };
+
   const addNewPair = () => {
     setUniMajorPairs([...uniMajorPairs, {}])
     setErrorMessage("")
@@ -48,7 +51,7 @@ export default function Home() {
   }
 
   const clearAll = () => {
-    setChosenCollege("")
+    setChosenCollege(null)
     setUniMajorPairs([{}])
     setErrorMessage("")
     setShowResults(false)
@@ -66,32 +69,69 @@ export default function Home() {
     })
   }
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     setErrorMessage("")
+    setIsLoading(true)
     
-    if (!chosenCollege) {
+    if (!chosenCollege || !chosenCollege.id) {
       setErrorMessage("Please select your current college first.")
+      setIsLoading(false)
       return
     }
     
-    const validPairs = uniMajorPairs.filter(pair => pair.university && pair.major)
+    const validPairs = uniMajorPairs.filter(pair => 
+      pair.university && pair.major && pair.university_id && pair.major_id
+    )
     
     if (validPairs.length === 0) {
-      setErrorMessage("Please add at least one university-major combination.")
+      setErrorMessage("Please add at least one complete university-major combination.")
+      setIsLoading(false)
       return
     }
+
+    // Cycle through loading messages
+    let messageIndex = 0;
+    setLoadingMessage(loadingMessages[messageIndex]);
     
-    setCourseData(sampleData)
-    setShowResults(true)
-    
-    // Auto-collapse sidebar on mobile after search
-    if (window.innerWidth <= 768) {
-      setSidebarOpen(false)
+    const messageInterval = setInterval(() => {
+      messageIndex = (messageIndex + 1) % loadingMessages.length;
+      setLoadingMessage(loadingMessages[messageIndex]);
+    }, 1500); // Change message every 1.5 seconds
+
+    try {
+      const transferRequest = {
+        request: validPairs.map(pair => ({
+          college_id: chosenCollege.id,
+          major_id: pair.major_id,
+          university_id: pair.university_id
+        })),
+        number_of_terms: 8
+      }      
+      const fetchedData = await fetchTransferPlan(transferRequest)
+      
+      clearInterval(messageInterval) // Stop cycling messages
+      setCourseData(fetchedData)
+      setShowResults(true)
+      
+      if (window.innerWidth <= 768) {
+        setSidebarOpen(false)
+      }
+      
+    } catch (error) {
+      clearInterval(messageInterval) // Stop cycling messages
+      console.error("Failed to fetch transfer plan:", error)
+      console.error("Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      })
+      
+      setErrorMessage("Failed to generate transfer plan. Please try again.")
+    } finally {
+      setIsLoading(false)
+      setLoadingMessage("")
     }
     
-    console.log("College:", chosenCollege)
-    console.log("University-Major Pairs:", validPairs)
-    console.log("Completed Courses:", completedCourses)
   }
 
   return (
@@ -133,15 +173,36 @@ export default function Home() {
           removePair={removePair}
           universities={universities}
           majors={majors}
+          colleges={college}
           handleSearch={handleSearch}
           clearAll={clearAll}
           isCompact={true}
         />
       </div>
 
-      {/* Main Content */}
+            {/* Main Content */}
       <div className={`main-content ${sidebarOpen ? 'with-sidebar' : 'full-width'}`}>
-        {!showResults ? (
+        {isLoading ? (
+          <div className="loading-screen">
+            <div className="loading-content">
+              <div className="loading-animation">
+                <div className="loading-spinner"></div>
+                <div className="loading-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+              </div>
+              <h2 className="loading-title">Creating Your Transfer Plan</h2>
+              <p className="loading-message">{loadingMessage}</p>
+              <div className="loading-progress">
+                <div className="progress-bar">
+                  <div className="progress-fill"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : !showResults ? (
           <div className="welcome-screen">
             <div className="welcome-header">
               <h1 className="app-title">Transfer Planner</h1>
@@ -162,6 +223,8 @@ export default function Home() {
             completedCourses={completedCourses}
             onToggleCourse={toggleCourseCompletion}
             onBack={() => setShowResults(false)}
+            onDataUpdate={handleDataUpdate} 
+            onClearCompleted={handleClearCompleted}
           />
         )}
       </div>
@@ -305,6 +368,127 @@ export default function Home() {
 
         .sidebar-overlay {
           display: none;
+        }
+
+        .loading-screen {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-height: 80vh;
+          padding: 2rem;
+        }
+
+        .loading-content {
+          text-align: center;
+          max-width: 500px;
+        }
+
+        .loading-animation {
+          margin-bottom: 2rem;
+          position: relative;
+        }
+
+        .loading-spinner {
+          width: 60px;
+          height: 60px;
+          border: 4px solid #f3f4f6;
+          border-top: 4px solid #3b82f6;
+          border-radius: 50%;
+          animation: spin 1s linear infinite;
+          margin: 0 auto 1rem auto;
+        }
+
+        .loading-dots {
+          display: flex;
+          justify-content: center;
+          gap: 0.5rem;
+        }
+
+        .loading-dots span {
+          width: 8px;
+          height: 8px;
+          background: #3b82f6;
+          border-radius: 50%;
+          animation: bounce 1.4s ease-in-out infinite both;
+        }
+
+        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
+        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
+
+        .loading-title {
+          font-size: 2rem;
+          font-weight: 500;
+          color: #1a1a1a;
+          margin: 0 0 1rem 0;
+          letter-spacing: -0.01em;
+        }
+
+        .loading-message {
+          font-size: 1.1rem;
+          color: #666;
+          margin: 0 0 2rem 0;
+          min-height: 1.5rem;
+          transition: opacity 0.3s ease;
+        }
+
+        .loading-progress {
+          width: 100%;
+          max-width: 300px;
+          margin: 0 auto;
+        }
+
+        .progress-bar {
+          width: 100%;
+          height: 4px;
+          background: #f3f4f6;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, #3b82f6, #10b981, #3b82f6);
+          background-size: 200% 100%;
+          animation: progressFlow 2s ease-in-out infinite;
+          border-radius: 2px;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        @keyframes bounce {
+          0%, 80%, 100% {
+            transform: scale(0);
+          }
+          40% {
+            transform: scale(1);
+          }
+        }
+
+        @keyframes progressFlow {
+          0% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: -200% 0;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .loading-title {
+            font-size: 1.5rem;
+          }
+
+          .loading-message {
+            font-size: 1rem;
+          }
+
+          .loading-spinner {
+            width: 50px;
+            height: 50px;
+          }
         }
 
         /* Mobile Responsive */

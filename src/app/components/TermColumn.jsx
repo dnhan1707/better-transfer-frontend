@@ -15,9 +15,9 @@ export default function TermColumn({ term, termName, completedCourses, onToggleC
       </div>
       
       <div className="courses-list">
-        {term.courses.map((course) => (
+        {term.courses.map((course, index) => (
           <CourseCard
-            key={course.id}
+            key={course.id || course.code || `${course.name}-${index}`} // Add fallback keys
             course={course}
             isCompleted={completedCourses.includes(course.code)}
             onToggleComplete={() => onToggleCourse(course.code)}

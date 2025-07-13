@@ -13,6 +13,7 @@ export default function InputFormContainer({
     removePair,
     universities,
     majors,
+    colleges,
     handleSearch,
     clearAll,
     isCompact = false
@@ -29,6 +30,7 @@ export default function InputFormContainer({
                 <CommunityCollegeSelection
                     chosenCollege={chosenCollege}
                     setChosenCollege={setChosenCollege}
+                    colleges={colleges}
                     isCompact={isCompact}
                 />
                 <PairSelection

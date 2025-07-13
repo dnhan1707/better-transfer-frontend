@@ -1,7 +1,15 @@
 import PlannerHeader from "./PlannerHeader";
 import TermGrid from "./TermGrid";
+import { fetchReOrderTransferPlan } from "../service/fetchingFunctions";
 
-export default function CoursePlanner({ data, completedCourses, onToggleCourse, onBack }) {
+export default function CoursePlanner({ 
+  data, 
+  completedCourses, 
+  onToggleCourse, 
+  onBack, 
+  onDataUpdate,
+  onClearCompleted 
+}) {
   const getTermName = (termNumber) => {
     const terms = ['Spring', 'Summer', 'Fall', 'Winter'];
     return `${terms[(termNumber - 1) % 4]} Year ${Math.ceil(termNumber / 4)}`;
@@ -13,16 +21,67 @@ export default function CoursePlanner({ data, completedCourses, onToggleCourse, 
     return sum + term.courses.filter(course => completedCourses.includes(course.code)).length;
   }, 0);
 
-  // Empty function for re-ordering - to be implemented later
-  const handleReorderPlan = () => {
-    console.log("Re-order plan requested");
-    console.log("Completed courses:", completedCourses);
-    // TODO: Implement re-ordering logic
-    // This could involve:
-    // - Analyzing completed courses
-    // - Rearranging remaining courses based on prerequisites
-    // - Optimizing course load per term
-    // - Making API call to backend for new plan
+  // Helper function to flatten prerequisite/alternative objects to arrays of strings
+  const flattenCourseArray = (courseArray) => {
+    if (!Array.isArray(courseArray)) return [];
+    
+    return courseArray.flatMap(item => {
+      if (typeof item === 'string') {
+        return item; // Already a string
+      } else if (item && item.prerequisite_courses) {
+        return item.prerequisite_courses; // Extract courses from object
+      } else if (item && typeof item === 'object') {
+        // Handle other object structures
+        return Object.values(item).filter(val => typeof val === 'string');
+      }
+      return []; // Skip invalid items
+    });
+  };
+
+  // Helper function to clean course data for backend
+  const cleanCourseData = (course) => {
+    return {
+      ...course,
+      prerequisites: flattenCourseArray(course.prerequisites || []),
+      alternatives: flattenCourseArray(course.alternatives || [])
+    };
+  };
+
+  // Helper function to clean term plan
+  const cleanTermPlan = (termPlan) => {
+    return termPlan.map(term => ({
+      ...term,
+      courses: term.courses.map(cleanCourseData)
+    }));
+  };
+
+  const handleReorderPlan = async () => {
+    try {
+      // Clean the data to match backend expectations
+      const cleanedTermPlan = cleanTermPlan(data.term_plan);
+      
+      // Build the request in the exact format the backend expects
+      const reOrderRequest = {
+        original_plan: {
+          targets: data.targets || [],
+          source_college: data.source_college || "",
+          term_plan: cleanedTermPlan,
+          unscheduled_courses: data.unscheduled_courses ? 
+            data.unscheduled_courses.map(cleanCourseData) : []
+        },
+        taken_classes: completedCourses
+      };
+
+      const res = await fetchReOrderTransferPlan(reOrderRequest);
+
+      // Update the data in the parent component
+      onDataUpdate(res);
+      // Clear completed courses
+      onClearCompleted();
+    } catch (error) {
+      console.error("Error fetching data in handleReorderPlan:", error);
+      // You might want to show a user-friendly error message here
+    }
   };
 
   return (

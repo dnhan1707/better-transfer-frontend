@@ -12,6 +12,7 @@ export default function CourseCard({ course, isCompleted, onToggleComplete }) {
   };
 
   const getDifficultyLabel = (difficulty) => {
+    if (difficulty <= 1) return 'Very Easy';
     if (difficulty <= 2) return 'Easy';
     if (difficulty <= 3) return 'Medium';
     if (difficulty <= 4) return 'Hard';
@@ -58,7 +59,7 @@ export default function CourseCard({ course, isCompleted, onToggleComplete }) {
             </span>
           </div>
           
-          {course.prerequisites.length > 0 && (
+          {course.prerequisites && course.prerequisites.length > 0 && (
             <div className="has-prereqs">
               <span className="prereq-indicator">📋 Prerequisites</span>
             </div>
