@@ -186,12 +186,12 @@ export default function Home() {
           <div className="loading-screen">
             <div className="loading-content">
               <div className="loading-animation">
-                <div className="loading-spinner"></div>
-                <div className="loading-dots">
+                {/* <div className="loading-spinner"></div> */}
+                {/* <div className="loading-dots">
                   <span></span>
                   <span></span>
                   <span></span>
-                </div>
+                </div> */}
               </div>
               <h2 className="loading-title">Creating Your Transfer Plan</h2>
               <p className="loading-message">{loadingMessage}</p>

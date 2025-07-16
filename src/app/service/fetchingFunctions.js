@@ -1,7 +1,7 @@
 
 async function fetchTransferPlan(transfer_request) {
     try {
-        const response = await fetch("http://localhost:8000/transfer-plan/v2/rag", {
+        const response = await fetch("https://better-transfer.onrender.com/transfer-plan/v2/rag", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -21,7 +21,7 @@ async function fetchTransferPlan(transfer_request) {
 
 async function fetchReOrderTransferPlan(transfer_request) {
     try {
-        const response = await fetch("http://localhost:8000/transfer-plan/v2/reorder", {
+        const response = await fetch("https://better-transfer.onrender.com/transfer-plan/v2/reorder", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
