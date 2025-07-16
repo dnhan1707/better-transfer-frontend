@@ -73,6 +73,9 @@ export default function Home() {
     setErrorMessage("")
     setIsLoading(true)
     
+    // Close sidebar when search is submitted
+    setSidebarOpen(false)
+    
     if (!chosenCollege || !chosenCollege.id) {
       setErrorMessage("Please select your current college first.")
       setIsLoading(false)
@@ -96,7 +99,7 @@ export default function Home() {
     const messageInterval = setInterval(() => {
       messageIndex = (messageIndex + 1) % loadingMessages.length;
       setLoadingMessage(loadingMessages[messageIndex]);
-    }, 1500); // Change message every 1.5 seconds
+    }, 1500);
 
     try {
       const transferRequest = {
@@ -109,16 +112,12 @@ export default function Home() {
       }      
       const fetchedData = await fetchTransferPlan(transferRequest)
       
-      clearInterval(messageInterval) // Stop cycling messages
+      clearInterval(messageInterval)
       setCourseData(fetchedData)
       setShowResults(true)
       
-      if (window.innerWidth <= 768) {
-        setSidebarOpen(false)
-      }
-      
     } catch (error) {
-      clearInterval(messageInterval) // Stop cycling messages
+      clearInterval(messageInterval)
       console.error("Failed to fetch transfer plan:", error)
       console.error("Error details:", {
         message: error.message,
@@ -131,12 +130,11 @@ export default function Home() {
       setIsLoading(false)
       setLoadingMessage("")
     }
-    
   }
 
   return (
     <div className="app-layout">
-      {/* Sidebar Toggle Button */}
+      {/* Mobile-Friendly Sidebar Toggle Button */}
       <button 
         className="sidebar-toggle"
         onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -152,10 +150,8 @@ export default function Home() {
           className="toggle-icon"
         >
           {sidebarOpen ? (
-            // Left arrow when sidebar is open (to close it)
             <path d="M15 18l-6-6 6-6"/>
           ) : (
-            // Right arrow when sidebar is closed (to open it)
             <path d="M9 18l6-6-6-6"/>
           )}
         </svg>
@@ -180,19 +176,12 @@ export default function Home() {
         />
       </div>
 
-            {/* Main Content */}
+      {/* Main Content */}
       <div className={`main-content ${sidebarOpen ? 'with-sidebar' : 'full-width'}`}>
         {isLoading ? (
           <div className="loading-screen">
             <div className="loading-content">
-              <div className="loading-animation">
-                {/* <div className="loading-spinner"></div> */}
-                {/* <div className="loading-dots">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div> */}
-              </div>
+              <div className="loading-animation"></div>
               <h2 className="loading-title">Creating Your Transfer Plan</h2>
               <p className="loading-message">{loadingMessage}</p>
               <div className="loading-progress">
@@ -247,32 +236,40 @@ export default function Home() {
           font-family: 'Inter', sans-serif;
           position: relative;
         }
+
         .sidebar-toggle {
           position: fixed;
-          top: 3%;
-          left: ${sidebarOpen ? '380px' : '0px'};
-          transform: translateY(-50%) ${sidebarOpen ? 'translateX(0)' : 'translateX(0)'};
+          top: 20px;
+          left: ${sidebarOpen ? '380px' : '20px'};
           z-index: 1001;
           background: #ffffff;
           border: 1px solid #e5e5e5;
-          border-radius: ${sidebarOpen ? '0 6px 6px 0' : '0 6px 6px 0'};
-          border-left: ${sidebarOpen ? '1px solid #e5e5e5' : 'none'};
-          padding: 0.75rem 0.5rem;
+          border-radius: 8px;
+          padding: 0.75rem;
           cursor: pointer;
           transition: all 0.3s ease;
-          box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
           color: #374151;
           display: flex;
           align-items: center;
           justify-content: center;
+          width: 44px;
+          height: 44px;
         }
-
 
         .sidebar-toggle:hover {
           background: #f3f4f6;
           border-color: #d1d5db;
-          // transform: translateY(-1px);
           box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          transform: translateY(-1px);
+        }
+
+        .sidebar-toggle:active {
+          transform: translateY(0);
+        }
+
+        .toggle-icon {
+          transition: transform 0.2s ease;
         }
 
         .sidebar {
@@ -388,33 +385,6 @@ export default function Home() {
           position: relative;
         }
 
-        .loading-spinner {
-          width: 60px;
-          height: 60px;
-          border: 4px solid #f3f4f6;
-          border-top: 4px solid #3b82f6;
-          border-radius: 50%;
-          animation: spin 1s linear infinite;
-          margin: 0 auto 1rem auto;
-        }
-
-        .loading-dots {
-          display: flex;
-          justify-content: center;
-          gap: 0.5rem;
-        }
-
-        .loading-dots span {
-          width: 8px;
-          height: 8px;
-          background: #3b82f6;
-          border-radius: 50%;
-          animation: bounce 1.4s ease-in-out infinite both;
-        }
-
-        .loading-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .loading-dots span:nth-child(2) { animation-delay: -0.16s; }
-
         .loading-title {
           font-size: 2rem;
           font-weight: 500;
@@ -453,20 +423,6 @@ export default function Home() {
           border-radius: 2px;
         }
 
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-
-        @keyframes bounce {
-          0%, 80%, 100% {
-            transform: scale(0);
-          }
-          40% {
-            transform: scale(1);
-          }
-        }
-
         @keyframes progressFlow {
           0% {
             background-position: 200% 0;
@@ -476,23 +432,22 @@ export default function Home() {
           }
         }
 
-        @media (max-width: 768px) {
-          .loading-title {
-            font-size: 1.5rem;
-          }
-
-          .loading-message {
-            font-size: 1rem;
-          }
-
-          .loading-spinner {
-            width: 50px;
-            height: 50px;
-          }
-        }
-
         /* Mobile Responsive */
         @media (max-width: 768px) {
+          .sidebar-toggle {
+            left: ${sidebarOpen ? '20px' : '20px'};
+            top: 20px;
+            background: ${sidebarOpen ? '#ffffff' : '#3b82f6'};
+            color: ${sidebarOpen ? '#374151' : '#ffffff'};
+            border-color: ${sidebarOpen ? '#e5e5e5' : '#3b82f6'};
+            box-shadow: 0 4px 12px rgba(0, 0, 0, ${sidebarOpen ? '0.1' : '0.2'});
+          }
+
+          .sidebar-toggle:hover {
+            background: ${sidebarOpen ? '#f3f4f6' : '#2563eb'};
+            transform: scale(1.05);
+          }
+
           .sidebar {
             width: 100%;
             max-width: 400px;
@@ -511,10 +466,14 @@ export default function Home() {
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
             z-index: 999;
+            opacity: ${sidebarOpen ? '1' : '0'};
+            pointer-events: ${sidebarOpen ? 'auto' : 'none'};
+            transition: opacity 0.3s ease;
           }
 
           .welcome-screen {
             margin: 2rem auto;
+            padding: 0 1rem;
           }
 
           .app-title {
@@ -528,9 +487,23 @@ export default function Home() {
           .quick-start {
             padding: 1.5rem;
           }
+
+          .loading-title {
+            font-size: 1.5rem;
+          }
+
+          .loading-message {
+            font-size: 1rem;
+          }
         }
 
         @media (max-width: 480px) {
+          .sidebar-toggle {
+            width: 40px;
+            height: 40px;
+            padding: 0.5rem;
+          }
+
           .app-title {
             font-size: 2rem;
           }
@@ -541,6 +514,21 @@ export default function Home() {
 
           .quick-start {
             padding: 1.25rem;
+          }
+
+          .main-content {
+            padding: 0.75rem;
+          }
+
+          .loading-screen {
+            padding: 1rem;
+          }
+        }
+
+        /* Tablet */
+        @media (min-width: 769px) and (max-width: 1024px) {
+          .sidebar-toggle {
+            left: ${sidebarOpen ? '380px' : '20px'};
           }
         }
       `}</style>
