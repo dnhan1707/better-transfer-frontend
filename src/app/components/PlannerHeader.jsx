@@ -108,10 +108,10 @@ export default function PlannerHeader({ data, completedCount, totalCourses, onBa
         }
 
         .progress-bar-mini {
-          width: 50px;
-          height: 3px;
+          width: 80px;
+          height: 6px;
           background: #e5e7eb;
-          border-radius: 1.5px;
+          border-radius: 3px;
           overflow: hidden;
         }
 

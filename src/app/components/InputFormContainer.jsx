@@ -2,6 +2,7 @@ import ActionButtons from "./ActionButtons";
 import CommunityCollegeSelection from "./CommunityCollegeSelection";
 import InputFormError from "./InputFormError";
 import PairSelection from "./PairSelection";
+import TermSetting from "./TermSetting";
 
 export default function InputFormContainer({
     errorMessage,
@@ -16,6 +17,8 @@ export default function InputFormContainer({
     colleges,
     handleSearch,
     clearAll,
+    numberOfSemester,
+    setNumberOfTerm,
     isCompact = false
 }){
     return (
@@ -42,6 +45,10 @@ export default function InputFormContainer({
                     majors={majors}
                     isCompact={isCompact}
                 />
+                <TermSetting
+                    numberOfSemester={numberOfSemester}
+                    setNumberOfTerm={setNumberOfTerm}
+                ></TermSetting>
                 <ActionButtons
                     handleSearch={handleSearch}
                     clearAll={clearAll}
