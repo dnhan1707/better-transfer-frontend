@@ -3,9 +3,44 @@ export default function TermSetting({
     numberOfSemester
 }) {
     const handleTermChange = (e) => {
-        const value = parseInt(e.target.value) || 0;
-        if (value >= 1 && value <= 12) { // Reasonable limits
+        const inputValue = e.target.value;
+        
+        // Allow empty input
+        if (inputValue === '') {
+            setNumberOfTerm('');
+            return;
+        }
+        
+        // Only allow digits
+        if (!/^\d+$/.test(inputValue)) {
+            return; // Don't update if non-numeric
+        }
+        
+        const value = parseInt(inputValue);
+        
+        // Validate range
+        if (value >= 1 && value <= 12) {
             setNumberOfTerm(value);
+        } else if (value > 12) {
+            setNumberOfTerm(12); // Auto-correct to max
+        }
+    };
+
+    // Handle key press to prevent non-numeric input
+    const handleKeyPress = (e) => {
+        // Allow backspace, delete, tab, escape, enter
+        if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+            // Allow Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            (e.keyCode === 65 && e.ctrlKey === true) ||
+            (e.keyCode === 67 && e.ctrlKey === true) ||
+            (e.keyCode === 86 && e.ctrlKey === true) ||
+            (e.keyCode === 88 && e.ctrlKey === true)) {
+            return;
+        }
+        
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
         }
     };
 
@@ -18,16 +53,16 @@ export default function TermSetting({
                 <div className="input-wrapper">
                     <input
                         id="term-input"
-                        type="number"
+                        type="text" // Changed from number to text
                         value={numberOfSemester}
                         onChange={handleTermChange}
-                        min="1"
-                        max="12"
-                        placeholder="Enter number of terms"
+                        onKeyDown={handleKeyPress}
+                        placeholder="Enter number of terms (1-12)"
                         className="term-input"
+                        maxLength="2" // Limit to 2 characters
                     />
                     <span className="input-hint">
-                        Plan for {numberOfSemester} term{numberOfSemester !== 1 ? 's' : ''}
+                        Plan for {numberOfSemester || 0} term{numberOfSemester !== 1 ? 's' : ''} (1-12 terms allowed)
                     </span>
                 </div>
             </div>
@@ -65,6 +100,8 @@ export default function TermSetting({
                     background: #ffffff;
                     transition: all 0.2s ease;
                     font-family: inherit;
+                    text-align: center; /* Center the number */
+                    font-weight: 500;
                 }
 
                 .term-input:focus {
@@ -79,23 +116,14 @@ export default function TermSetting({
 
                 .term-input::placeholder {
                     color: #9ca3af;
+                    text-align: center;
                 }
 
                 .input-hint {
                     font-size: 0.75rem;
                     color: #6b7280;
                     font-style: italic;
-                }
-
-                /* Number input styling */
-                .term-input::-webkit-outer-spin-button,
-                .term-input::-webkit-inner-spin-button {
-                    -webkit-appearance: none;
-                    margin: 0;
-                }
-
-                .term-input[type=number] {
-                    -moz-appearance: textfield;
+                    text-align: center;
                 }
 
                 @media (max-width: 768px) {

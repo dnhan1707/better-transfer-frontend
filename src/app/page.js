@@ -19,7 +19,7 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isLoading, setIsLoading] = useState(false) 
   const [loadingMessage, setLoadingMessage] = useState("") 
-  const [numberOfterm, setNumberOfTerm] = useState(6)
+  const [numberOfterm, setNumberOfTerm] = useState('6')
 
   const handleDataUpdate = (newData) => {
     setCourseData(newData);
@@ -93,7 +93,7 @@ export default function Home() {
       return
     }
 
-    if (numberOfterm <= 0) {
+    if (parseInt(numberOfterm) <= 0) {
       setErrorMessage("Please set at least one semester")
       setIsLoading(false)
       return
@@ -115,7 +115,7 @@ export default function Home() {
           major_id: pair.major_id,
           university_id: pair.university_id
         })),
-        number_of_terms: numberOfterm
+        number_of_terms: parseInt(numberOfterm)
       }      
       const fetchedData = await fetchTransferPlan(transferRequest)
       
