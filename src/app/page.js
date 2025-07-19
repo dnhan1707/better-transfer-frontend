@@ -191,7 +191,7 @@ export default function Home() {
           <div className="loading-screen">
             <div className="loading-content">
               <div className="loading-animation"></div>
-              <h2 className="loading-title">Creating Your Transfer Plan</h2>
+              <h2 className="loading-title">Creating Your Transfer Plan (this process normally takes 20 sec)</h2>
               <p className="loading-message">{loadingMessage}</p>
               <div className="loading-progress">
                 <div className="progress-bar">
