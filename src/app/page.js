@@ -19,7 +19,7 @@ export default function Home() {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [isLoading, setIsLoading] = useState(false) 
   const [loadingMessage, setLoadingMessage] = useState("") 
-  const [numberOfterm, setNumberOfTerm] = useState('6')
+  const [numberOfterm, setNumberOfTerm] = useState('8')
 
   const handleDataUpdate = (newData) => {
     setCourseData(newData);
@@ -191,7 +191,8 @@ export default function Home() {
           <div className="loading-screen">
             <div className="loading-content">
               <div className="loading-animation"></div>
-              <h2 className="loading-title">Creating Your Transfer Plan (this process normally takes 20 sec)</h2>
+              <h2 className="loading-title">Creating Your Transfer Plan</h2>
+              <p className="loading-subtitle">This usually takes about 20 seconds</p>
               <p className="loading-message">{loadingMessage}</p>
               <div className="loading-progress">
                 <div className="progress-bar">
@@ -382,6 +383,12 @@ export default function Home() {
           justify-content: center;
           min-height: 80vh;
           padding: 2rem;
+        }
+        .loading-subtitle {
+          font-size: 0.9rem;
+          color: #9ca3af;
+          margin: 0 0 1.5rem 0;
+          font-weight: 400;
         }
 
         .loading-content {
