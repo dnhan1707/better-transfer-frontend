@@ -1,4 +1,4 @@
-const base_url = "https://better-transfer.onrender.com/transfer-plan"
+const base_url = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 async function fetchTransferPlan(transfer_request) {
     try {
