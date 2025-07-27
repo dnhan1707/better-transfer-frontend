@@ -1,11 +1,9 @@
 "use client"
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import InputFormContainer from "./components/InputFormContainer";
 import CoursePlanner from "./components/CoursePlanner";
-import { universities } from "../../public/university";
-import { majors } from "../../public/major";
-import { college } from "../../public/college";
+import { fetchingUniversities, fetchingColleges } from "./service/fetchingFunctions";
 import { fetchTransferPlan } from "./service/fetchingFunctions";
 import { loadingMessages } from "../../public/messageLoading";
 
@@ -20,6 +18,32 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false) 
   const [loadingMessage, setLoadingMessage] = useState("") 
   const [numberOfterm, setNumberOfTerm] = useState('8')
+  const [universities, setUniversities] = useState([])
+  const [colleges, setColleges] = useState([])
+  const [loadingUniCol, setLoadingUniCol] = useState(false)
+
+
+  useEffect(() => {
+    const fetchInitial = async () => {
+      try {
+        setLoadingUniCol(true)
+        const [fetchedUniversities, fetchedColleges] = await Promise.all([
+          fetchingUniversities(), fetchingColleges()
+        ]);
+        
+        setUniversities(fetchedUniversities)
+        setColleges(fetchedColleges)
+
+      } catch (error) {
+        throw new Error(`Something wrong with fetchInitial: ${error}`)
+      } finally {
+        setLoadingUniCol(false)
+      }
+    }
+
+    fetchInitial()
+
+  }, [])
 
   const handleDataUpdate = (newData) => {
     setCourseData(newData);
@@ -71,6 +95,7 @@ export default function Home() {
   }
 
   const handleSearch = async () => {
+
     setErrorMessage("")
     setIsLoading(true)
     
@@ -86,7 +111,7 @@ export default function Home() {
     const validPairs = uniMajorPairs.filter(pair => 
       pair.university && pair.major && pair.university_id && pair.major_id
     )
-    
+
     if (validPairs.length === 0) {
       setErrorMessage("Please add at least one complete university-major combination.")
       setIsLoading(false)
@@ -166,23 +191,29 @@ export default function Home() {
 
       {/* Sidebar */}
       <div className={`sidebar ${sidebarOpen ? 'open' : 'closed'}`}>
-        <InputFormContainer
-          errorMessage={errorMessage}
-          chosenCollege={chosenCollege}
-          setChosenCollege={setChosenCollege}
-          addNewPair={addNewPair}
-          uniMajorPairs={uniMajorPairs}
-          updatePair={updatePair}
-          removePair={removePair}
-          universities={universities}
-          majors={majors}
-          colleges={college}
-          handleSearch={handleSearch}
-          clearAll={clearAll}
-          numberOfSemester={numberOfterm}
-          setNumberOfTerm={setNumberOfTerm}
-          isCompact={true}
-        />
+        {loadingUniCol ? (
+          <div className="sidebar-loading">
+            <div className="loading-spinner"></div>
+            <p>Loading data...</p>
+          </div>
+        ) : (
+          <InputFormContainer
+            errorMessage={errorMessage}
+            chosenCollege={chosenCollege}
+            setChosenCollege={setChosenCollege}
+            addNewPair={addNewPair}
+            uniMajorPairs={uniMajorPairs}
+            updatePair={updatePair}
+            removePair={removePair}
+            universities={universities}
+            colleges={colleges}
+            handleSearch={handleSearch}
+            clearAll={clearAll}
+            numberOfSemester={numberOfterm}
+            setNumberOfTerm={setNumberOfTerm}
+            isCompact={true}
+          />
+        )}
       </div>
 
       {/* Main Content */}
@@ -246,7 +277,6 @@ export default function Home() {
           font-family: 'Inter', sans-serif;
           position: relative;
         }
-
         .sidebar-toggle {
           position: fixed;
           top: 20px;
@@ -283,7 +313,7 @@ export default function Home() {
         }
 
         .sidebar {
-          width: 380px;
+          width: 30%;
           background: #ffffff;
           border-right: 1px solid #e5e5e5;
           transition: transform 0.3s ease;

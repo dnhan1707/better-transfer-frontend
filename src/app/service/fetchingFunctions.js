@@ -1,7 +1,8 @@
+const base_url = "https://better-transfer.onrender.com/transfer-plan"
 
 async function fetchTransferPlan(transfer_request) {
     try {
-        const response = await fetch("https://better-transfer.onrender.com/transfer-plan/v2/rag", {
+        const response = await fetch(`${base_url}/v2/rag`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json"
@@ -21,7 +22,7 @@ async function fetchTransferPlan(transfer_request) {
 
 async function fetchReOrderTransferPlan(transfer_request) {
     try {
-        const response = await fetch("https://better-transfer.onrender.com/transfer-plan/v2/reorder", {
+        const response = await fetch(`${base_url}/v2/reorder`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -40,4 +41,67 @@ async function fetchReOrderTransferPlan(transfer_request) {
     }
 }
 
-export { fetchTransferPlan, fetchReOrderTransferPlan }
+async function fetchingMajorList(university_id, college_id) {
+    try {
+        const response = await fetch(`${base_url}/v1/majorlist/${university_id}/${college_id}`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+        }
+        const result = await response.json()
+        return result
+
+    } catch (error) {
+        console.error("Error fetching data from fetchingUniversities:", error);
+        throw error;
+    }
+}
+
+
+async function fetchingUniversities() {
+    try {
+        const response = await fetch(`${base_url}/v1/universities`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+        }
+        const result = await response.json()
+        return result
+
+    } catch (error) {
+        console.error("Error fetching data from fetchingUniversities:", error);
+        throw error;
+    }
+}
+
+async function fetchingColleges() {
+    try {
+        const response = await fetch(`${base_url}/v1/colleges`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`)
+        }
+        const result = await response.json()
+        return result
+
+    } catch (error) {
+        console.error("Error fetching data from fetchingColleges:", error);
+        throw error;
+    }
+}
+
+
+
+export { fetchTransferPlan, fetchReOrderTransferPlan, fetchingMajorList, fetchingUniversities, fetchingColleges }

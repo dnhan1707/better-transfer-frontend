@@ -13,7 +13,6 @@ export default function InputFormContainer({
     updatePair,
     removePair,
     universities,
-    majors,
     colleges,
     handleSearch,
     clearAll,
@@ -42,7 +41,7 @@ export default function InputFormContainer({
                     updatePair={updatePair}
                     removePair={removePair}
                     universities={universities}
-                    majors={majors}
+                    chosenCollege={chosenCollege}
                     isCompact={isCompact}
                 />
                 <TermSetting
