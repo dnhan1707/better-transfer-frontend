@@ -43,6 +43,11 @@ export default function Home() {
 
     fetchInitial()
 
+    // Re-fetch every 15 minutes (900,000 ms)
+    const intervalId = setInterval(fetchInitial, 15 * 60 * 1000)
+
+    // Cleanup on unmount
+    return () => clearInterval(intervalId)
   }, [])
 
   const handleDataUpdate = (newData) => {
